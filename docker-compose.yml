@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  redirekt:
+    build: .
+    container_name: redirekt
+    depends_on:
+      - mongo
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=mongodb://mongo:mongo@mongo/redirekt?retryWrites=true&w=majority
+      - USE_GITHUB_API=true
+    env_file:
+      - .env
+    networks:
+      - redirekt
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    volumes:
+      - redirekt_mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=mongo
+      - MONGO_INITDB_DATABASE=redirekt
+    networks:
+      - redirekt
+
+volumes:
+  redirekt_mongo:
+
+networks:
+  redirekt:
