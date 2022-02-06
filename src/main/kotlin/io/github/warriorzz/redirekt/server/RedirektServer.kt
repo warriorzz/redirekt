@@ -2,70 +2,39 @@ package io.github.warriorzz.redirekt.server
 
 import freemarker.cache.ClassTemplateLoader
 import io.github.warriorzz.redirekt.config.Config
-import io.github.warriorzz.redirekt.io.MarkdownEntry
-import io.github.warriorzz.redirekt.io.RedirectEntry
-import io.github.warriorzz.redirekt.io.RedirektEntry
-import io.github.warriorzz.redirekt.io.Repositories
-import io.github.warriorzz.redirekt.util.MarkdownUtil
+import io.github.warriorzz.redirekt.io.*
+import io.github.warriorzz.redirekt.util.configureAuthorization
+import io.github.warriorzz.redirekt.util.configureDashboard
 import io.github.warriorzz.redirekt.util.respondMarkdown
 import io.ktor.application.*
+import io.ktor.client.*
+import io.ktor.client.features.json.*
+import io.ktor.client.features.json.serializer.*
 import io.ktor.freemarker.*
-import io.ktor.http.*
 import io.ktor.http.content.*
-import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.litote.kmongo.eq
+import java.io.File
 
 object RedirektServer {
+
+    val httpClient = HttpClient {
+        install(JsonFeature) {
+            serializer = KotlinxSerializer(kotlinx.serialization.json.Json { ignoreUnknownKeys = true })
+        }
+    }
 
     private val server = embeddedServer(CIO, port = Config.PORT) {
         install(FreeMarker) {
             templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
         }
         routing {
-            route("/dashboard") {
-                get {
-                    if (!call.parameters.contains("code")) {
-                        call.respondRedirect("https://github.com/login/oauth/authorize?client_id=${Config.GITHUB_CLIENT_ID}${if (Config.GITHUB_REDIRECT_URI != "") "&redirect_uri=${Config.GITHUB_REDIRECT_URI}" else ""}")
-                        return@get
-                    }
-                    call.respondText("Hello, world!", contentType = ContentType.Text.Plain)
-                }
-
-                get("/login") {
-                    if (!call.parameters.contains("code")) {
-                        call.respondRedirect("/dashboard")
-                    }
-
-                }
-
-                post("/upload") {
-                    call.request.headers["Authorization"]
-                    call.respondRedirect("/dashboard")
-
-                    val multipart = call.receiveMultipart()
-                    multipart.forEachPart { part ->
-                        if (part is PartData.FileItem && part.contentType != ContentType.Text.Any && part.originalFileName?.endsWith(
-                                ".md"
-                            ) == true
-                        ) {
-                            val name = part.originalFileName!!
-                            var text = ""
-                            launch {
-                                text = String(part.streamProvider().readAllBytes())
-                            }.join()
-                            Repositories.entries.insertOne(RedirektEntry(name, MarkdownEntry(text)))
-                        }
-                        part.dispose()
-                    }
-                }
-            }
-
-            get("/{name}") {
+            if (!Config.DASHBOARD_MODE) configureDashboard()
+            get("/${if (Config.DASHBOARD_MODE) "" else "r/"}{name}") {
                 val name = call.parameters["name"]
                 Repositories.entries.findOne(RedirektEntry::name eq name)
                     ?.let {
@@ -73,10 +42,12 @@ object RedirektServer {
                             call.respondRedirect(it.value.url)
                         } else if (it.value is MarkdownEntry) {
                             call.respondMarkdown(it.value.markdown)
+                        } else if (it.value is FileEntry) {
+                            call.respondFile(File(it.value.path)) {}
                         } else {
-                            call.respondRedirect("wtf.wtf")
+                            call.respondMarkdown("# Unsupported operation", "Redirekt")
                         }
-                    } ?: call.respondRedirect("https://google.com")
+                    } ?: call.respondMarkdown("# Error", "Redirekt - Error")
             }
 
             static("/static") {
@@ -85,12 +56,22 @@ object RedirektServer {
         }
     }
 
-    suspend operator fun invoke() {
-        if (Repositories.entries.find().first() == null) {
-            Repositories.entries.insertOne(RedirektEntry("duckduckgo", RedirectEntry("https://duckduckgo.com")))
-            Repositories.entries.insertOne(RedirektEntry("github", MarkdownEntry(MarkdownUtil.computeMarkdown("# Some content"))))
-            println(MarkdownUtil.computeMarkdown("# Some content"))
+    operator fun invoke() {
+        if (Config.DASHBOARD_MODE) {
+            val dashboardServer = embeddedServer(CIO, port = Config.DASHBOARD_PORT) {
+                install(FreeMarker) {
+                    templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
+                }
+                configureAuthorization()
+                routing {
+                    configureDashboard()
+                }
+            }
+            dashboardServer.start(false)
         }
         server.start(wait = true)
     }
 }
+
+@Serializable
+data class UserSession(val accessToken: String)

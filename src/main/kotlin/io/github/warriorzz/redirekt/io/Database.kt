@@ -33,6 +33,11 @@ data class RedirectEntry(
     val url: String,
 ) : RedirektEntryValue()
 
+@Serializable
+data class FileEntry(
+    val path: String,
+) : RedirektEntryValue()
+
 val redirektModule = SerializersModule {
     polymorphic(RedirektEntryValue::class) {
         subclass(MarkdownEntry::class, MarkdownEntry.serializer())

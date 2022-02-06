@@ -5,10 +5,14 @@ import dev.schlaubi.envconf.getEnv
 
 object Config {
 
+    val AUTHORIZED_GITHUB_USER by environment
     val GITHUB_CLIENT_ID by environment
-    val GITHUB_REDIRECT_URI by getEnv(default = "")
-    val STYLESHEET_URL by getEnv(default = "https://raw.githubusercontent.com/sindresorhus/github-markdown-css/main/github-markdown.css")
-    val PORT by getEnv(default = 8080) { it.toInt() }
+    val GITHUB_CLIENT_SECRET by environment
+    val SERVER_URL by environment
+    val DASHBOARD_URL by getEnv(default = SERVER_URL)
+    val DASHBOARD_MODE by getEnv(default = true) { it.toBoolean() }
+    val PORT by getEnv(default = 8088) { it.toInt() }
+    val DASHBOARD_PORT by getEnv(default = 8089) { it.toInt() }
     val DATABASE_NAME by getEnv(default = "redirekt")
     val DATABASE_URL by environment
     val USE_GITHUB_API by getEnv(default = false) { it.toBoolean() }
