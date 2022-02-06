@@ -3,6 +3,7 @@ package io.github.warriorzz.redirekt.server
 import freemarker.cache.ClassTemplateLoader
 import io.github.warriorzz.redirekt.config.Config
 import io.github.warriorzz.redirekt.io.*
+import io.github.warriorzz.redirekt.util.MarkdownUtil
 import io.github.warriorzz.redirekt.util.configureAuthorization
 import io.github.warriorzz.redirekt.util.configureDashboard
 import io.github.warriorzz.redirekt.util.respondMarkdown
@@ -45,9 +46,9 @@ object RedirektServer {
                         } else if (it.value is FileEntry) {
                             call.respondFile(File(it.value.path)) {}
                         } else {
-                            call.respondMarkdown("# Unsupported operation", "Redirekt")
+                            call.respondMarkdown(MarkdownUtil.computeMarkdown("# Unsupported operation"), "Redirekt")
                         }
-                    } ?: call.respondMarkdown("# Error", "Redirekt - Error")
+                    } ?: call.respondMarkdown(MarkdownUtil.computeMarkdown("# Error"), "Redirekt - Error")
             }
 
             static("/static") {
