@@ -2,7 +2,7 @@
 
 Simple redirect server with some markdown implementation stuff.
 
-It uses [this style sheet](https://github.com/sindresorhus/github-markdown-css/blob/main/github-markdown.css) for displaying markdown.
+It uses [this style sheet](https://github.com/sindresorhus/github-markdown-css/) for displaying markdown.
 
 ## To do
 

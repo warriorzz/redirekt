@@ -6,12 +6,12 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.freemarker.*
-import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
+import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import org.intellij.markdown.html.HtmlGenerator
 import org.intellij.markdown.parser.MarkdownParser
 
 object MarkdownUtil {
-    private val flavour = CommonMarkFlavourDescriptor()
+    private val flavour = GFMFlavourDescriptor()
 
     suspend fun computeMarkdown(content: String): String {
         println(content)

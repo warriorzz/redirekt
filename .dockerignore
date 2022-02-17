@@ -1,0 +1,11 @@
+.gradle
+.idea
+.dockerignore
+.git
+.gitignore
+redeploy.sh
+redeploy.bat
+Dockerfile
+docker-compose.yml
+gradlew.bat
+README.md
