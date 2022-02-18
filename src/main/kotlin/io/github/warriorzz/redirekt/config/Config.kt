@@ -16,4 +16,5 @@ object Config {
     val DATABASE_NAME by getEnv(default = "redirekt")
     val DATABASE_URL by environment
     val USE_GITHUB_API by getEnv(default = false) { it.toBoolean() }
+    val FILE_ROOT_DIRECTORY by getEnv(default = "/usr/app/files")
 }

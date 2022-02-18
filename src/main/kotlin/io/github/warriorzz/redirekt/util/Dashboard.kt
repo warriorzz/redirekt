@@ -1,10 +1,7 @@
 package io.github.warriorzz.redirekt.util
 
 import io.github.warriorzz.redirekt.config.Config
-import io.github.warriorzz.redirekt.io.MarkdownEntry
-import io.github.warriorzz.redirekt.io.RedirectEntry
-import io.github.warriorzz.redirekt.io.RedirektEntry
-import io.github.warriorzz.redirekt.io.Repositories
+import io.github.warriorzz.redirekt.io.*
 import io.github.warriorzz.redirekt.model.GitHubUserResponse
 import io.github.warriorzz.redirekt.server.RedirektServer
 import io.github.warriorzz.redirekt.server.UserSession
@@ -21,6 +18,8 @@ import io.ktor.sessions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.litote.kmongo.eq
+import java.io.File
+import java.util.UUID
 
 fun Routing.configureDashboard() {
     get("/") {
@@ -91,7 +90,6 @@ fun Routing.configureDashboard() {
                 var name = ""
 
                 multipart.forEachPart { part ->
-                    println(part.contentType)
                     if (part is PartData.FileItem && part.contentType != ContentType("text", "markdown")) {
                         markdownText = String(withContext(Dispatchers.IO) {
                             part.streamProvider().readAllBytes()
@@ -114,6 +112,47 @@ fun Routing.configureDashboard() {
                     RedirektEntry(
                         name,
                         MarkdownEntry(MarkdownUtil.computeMarkdown(markdownText))
+                    )
+                )
+
+                call.respondRedirect("${Config.DASHBOARD_URL}/dashboard?success=true")
+            }
+
+            post("/file") {
+                if (call.sessions.get<UserSession>() == null) {
+                    return@post
+                }
+
+                val multipart = call.receiveMultipart()
+
+                var name = ""
+                var path = ""
+                val fileUuid = UUID.randomUUID().toString()
+
+                multipart.forEachPart { part ->
+                    if (part is PartData.FileItem && part.contentType != ContentType("text", "markdown")) {
+                        withContext(Dispatchers.IO) {
+                            path = "${Config.FILE_ROOT_DIRECTORY}/$fileUuid.${part.originalFileName?.split(".")?.get(1) ?: ""}"
+                            part.streamProvider().transferTo(File(path).outputStream())
+                        }
+                    }
+                    if (part is PartData.FormItem) {
+                        withContext(Dispatchers.IO) {
+                            name = part.value
+                        }
+                    }
+                    part.dispose()
+                }
+
+                if (Repositories.entries.findOne(RedirektEntry::name eq name) != null) {
+                    call.respondRedirect("/dashboard?error=true")
+                    return@post
+                }
+
+                Repositories.entries.insertOne(
+                    RedirektEntry(
+                        name,
+                        FileEntry(path)
                     )
                 )
 

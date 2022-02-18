@@ -6,7 +6,7 @@ It uses [this style sheet](https://github.com/sindresorhus/github-markdown-css/)
 
 ## To do
 
-* Make uploading files for file server possible
+~~* Make uploading files for file server possible~~
 * Fix GitHub Markdown API error when reading from markdown file
 * Documentation
 * Dashboard implementation:

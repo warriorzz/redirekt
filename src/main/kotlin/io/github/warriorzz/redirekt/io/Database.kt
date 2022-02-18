@@ -42,5 +42,6 @@ val redirektModule = SerializersModule {
     polymorphic(RedirektEntryValue::class) {
         subclass(MarkdownEntry::class, MarkdownEntry.serializer())
         subclass(RedirectEntry::class, RedirectEntry.serializer())
+        subclass(FileEntry::class, FileEntry.serializer())
     }
 }

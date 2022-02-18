@@ -12,6 +12,8 @@ services:
     environment:
       - DATABASE_URL=mongodb://mongo:mongo@mongo/redirekt?retryWrites=true&w=majority
       - USE_GITHUB_API=false
+    volumes:
+      - ./files:/usr/app/files
     env_file:
       - .env
     networks:
