@@ -22,3 +22,19 @@ jobs:
             ~/.gradle
       - name: Build with Gradle
         run: ./gradlew assemble test
+  docker:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build image
+        run: docker build . -t ghcr.io/warriorzz/redirekt/redirekt:latest -t ghcr.io/warriorzz/redirekt/redirekt:"$GITHUB_SHA"
+      - name: Login ghcr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: docker login ghcr.io --username warriorzz --password "$GITHUB_TOKEN"
+      - name: Push image to ghcr
+        run: docker push ghcr.io/warriorzz/redirekt/redirekt:latest
+      - name: Push specific tag
+        run: docker push ghcr.io/warriorzz/redirekt/redirekt:"$GITHUB_SHA"
