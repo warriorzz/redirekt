@@ -33,8 +33,13 @@ object RedirektServer {
         install(FreeMarker) {
             templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
         }
+        if (!Config.DASHBOARD_MODE) {
+            configureAuthorization()
+        }
         routing {
-            if (!Config.DASHBOARD_MODE) configureDashboard()
+            if (!Config.DASHBOARD_MODE) {
+                configureDashboard()
+            }
             get("/${if (Config.DASHBOARD_MODE) "" else "r/"}{name}") {
                 val name = call.parameters["name"]
                 Repositories.entries.findOne(RedirektEntry::name eq name)
