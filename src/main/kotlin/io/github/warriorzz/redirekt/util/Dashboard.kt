@@ -73,12 +73,12 @@ fun Routing.configureDashboard() {
                         "styleSheet" to Config.SERVER_URL + "/static/dashboard.css",
                         "errorBanner" to if ((call.parameters["error"] ?: "false").toBoolean())
                             """<div class="banner">
-                                <p>There was an error. Please try again.</p>
+                                <p>${translate("dashboard.error")}</p>
                             </div>
                             """ else "",
                         "successBanner" to if ((call.parameters["success"] ?: "false").toBoolean())
                             """<div class="banner">
-                                <p>Success!</p>
+                                <p>${translate("dashboard.success")}</p>
                             </div>
                             """ else "",
                         "icon" to Config.SERVER_URL + "/static/favicon.png"

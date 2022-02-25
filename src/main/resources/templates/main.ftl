@@ -4,6 +4,7 @@
     <title>Redirekt</title>
     <link href="${styleSheet}" rel="stylesheet" type="text/css">
     <link href="${icon}" rel="icon">
+    <meta charset="UTF-8">
 </head>
 <body>
     <button onclick="login()">${main_login_github}</button>

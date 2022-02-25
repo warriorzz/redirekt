@@ -4,6 +4,7 @@
     <title>${title}</title>
     <link href="${styleSheet}" rel="stylesheet" type="text/css">
     <link href="${icon}" rel="icon">
+    <meta charset="UTF-8">
     <style>
         .markdown-body {
             box-sizing: border-box;

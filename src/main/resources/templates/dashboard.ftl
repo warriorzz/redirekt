@@ -3,6 +3,7 @@
     <title>Redirekt - ${dashboard_dashboard}</title>
     <link href="${styleSheet}" rel="stylesheet" type="text/css">
     <link href="${icon}" rel="icon">
+    <meta charset="UTF-8">
 </head>
 <body>
     ${errorBanner}

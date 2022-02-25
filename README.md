@@ -12,6 +12,6 @@ It uses [this style sheet](https://github.com/sindresorhus/github-markdown-css/)
 * Dashboard implementation:
   * Edit, delete redirects
 ~~ * some html/style so it doesn't look like it was made 20 years ago~~
-* i18n
+~~ * i18n~~
 * multiple accounts possible? (roles?)
 * much more, if you have an idea, open a pr / issue!
