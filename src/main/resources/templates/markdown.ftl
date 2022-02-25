@@ -3,6 +3,7 @@
 <head>
     <title>${title}</title>
     <link href="${styleSheet}" rel="stylesheet" type="text/css">
+    <link href="${icon}" rel="icon">
     <style>
         .markdown-body {
             box-sizing: border-box;

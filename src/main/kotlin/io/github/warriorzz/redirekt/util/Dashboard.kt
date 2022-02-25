@@ -19,11 +19,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.litote.kmongo.eq
 import java.io.File
-import java.util.UUID
+import java.util.*
 
 fun Routing.configureDashboard() {
     get("/") {
-        call.respondTemplate("main.ftl", mapOf("loginUrl" to Config.DASHBOARD_URL + "/login"))
+        call.respondTemplate(
+            "main.ftl", mapOf(
+                "loginUrl" to Config.DASHBOARD_URL + "/login",
+                "styleSheet" to Config.SERVER_URL + "/static/dashboard.css",
+                "icon" to Config.SERVER_URL + "/static/favicon.png",
+            )
+        )
     }
 
     authenticate("auth-dashboard") {
@@ -66,15 +72,16 @@ fun Routing.configureDashboard() {
                     mapOf(
                         "styleSheet" to Config.SERVER_URL + "/static/dashboard.css",
                         "errorBanner" to if ((call.parameters["error"] ?: "false").toBoolean())
-                            """|    <div class="banner">
-                            |        <p>There was an error. Please try again.</p>
-                            |    </div>
-                            """.trimIndent() else "",
+                            """<div class="banner">
+                                <p>There was an error. Please try again.</p>
+                            </div>
+                            """ else "",
                         "successBanner" to if ((call.parameters["success"] ?: "false").toBoolean())
-                            """|    <div class="banner">
-                            |        <p>Success!</p>
-                            |    </div>
-                            """.trimIndent() else "",
+                            """<div class="banner">
+                                <p>Success!</p>
+                            </div>
+                            """ else "",
+                        "icon" to Config.SERVER_URL + "/static/favicon.png"
                     )
                 )
             }
@@ -132,7 +139,9 @@ fun Routing.configureDashboard() {
                 multipart.forEachPart { part ->
                     if (part is PartData.FileItem && part.contentType != ContentType("text", "markdown")) {
                         withContext(Dispatchers.IO) {
-                            path = "${Config.FILE_ROOT_DIRECTORY}/$fileUuid.${part.originalFileName?.split(".")?.get(1) ?: ""}"
+                            path = "${Config.FILE_ROOT_DIRECTORY}/$fileUuid.${
+                                part.originalFileName?.split(".")?.get(1) ?: ""
+                            }"
                             part.streamProvider().transferTo(File(path).outputStream())
                         }
                     }

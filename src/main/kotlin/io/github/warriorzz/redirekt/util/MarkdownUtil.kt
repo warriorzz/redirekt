@@ -14,8 +14,7 @@ object MarkdownUtil {
     private val flavour = GFMFlavourDescriptor()
 
     suspend fun computeMarkdown(content: String): String {
-        println(content)
-        return if (Config.USE_GITHUB_API) fetchGithubMarkdown(content) else generateMarkdown(content)
+        return if (Config.USE_GITHUB_API) fetchGithubMarkdown(content) else generateMarkdown(content.replace("\r\n", "\n"))
     }
 
     private suspend fun fetchGithubMarkdown(content: String): String {
@@ -33,5 +32,5 @@ object MarkdownUtil {
 }
 
 suspend fun ApplicationCall.respondMarkdown(content: String, title: String = "Redirekt") {
-    respondTemplate("markdown.ftl", mapOf("content" to content, "styleSheet" to Config.SERVER_URL + "/static/style.css", "title" to title))
+    respondTemplate("markdown.ftl", mapOf("content" to content, "styleSheet" to Config.SERVER_URL + "/static/style.css", "title" to title, "icon" to Config.SERVER_URL + "/static/favicon.png"))
 }
