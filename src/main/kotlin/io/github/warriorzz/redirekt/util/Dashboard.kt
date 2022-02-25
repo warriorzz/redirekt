@@ -23,7 +23,7 @@ import java.util.*
 
 fun Routing.configureDashboard() {
     get("/") {
-        call.respondTemplate(
+        call.respondLocalizedTemplate(
             "main.ftl", mapOf(
                 "loginUrl" to Config.DASHBOARD_URL + "/login",
                 "styleSheet" to Config.SERVER_URL + "/static/dashboard.css",
@@ -67,7 +67,7 @@ fun Routing.configureDashboard() {
                     return@get
                 }
 
-                call.respondTemplate(
+                call.respondLocalizedTemplate(
                     "dashboard.ftl",
                     mapOf(
                         "styleSheet" to Config.SERVER_URL + "/static/dashboard.css",
@@ -81,12 +81,7 @@ fun Routing.configureDashboard() {
                                 <p>Success!</p>
                             </div>
                             """ else "",
-                        "icon" to Config.SERVER_URL + "/static/favicon.png",
-                        "file" to translate("dashboard.file"),
-                        "markdown" to translate("dashboard.markdown"),
-                        "redirect" to translate("dashboard.redirect"),
-                        "name" to translate("dashboard.name"),
-                        "url" to translate("dashboard.url")
+                        "icon" to Config.SERVER_URL + "/static/favicon.png"
                     )
                 )
             }

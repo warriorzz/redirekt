@@ -6,7 +6,7 @@
     <link href="${icon}" rel="icon">
 </head>
 <body>
-    <button onclick="login()">Login with GitHub</button>
+    <button onclick="login()">${main_login_github}</button>
     <script>
         function login() {
             window.location.href = 'login';

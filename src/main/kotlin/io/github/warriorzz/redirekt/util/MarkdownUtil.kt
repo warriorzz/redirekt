@@ -32,5 +32,5 @@ object MarkdownUtil {
 }
 
 suspend fun ApplicationCall.respondMarkdown(content: String, title: String = "Redirekt") {
-    respondTemplate("markdown.ftl", mapOf("content" to content, "styleSheet" to Config.SERVER_URL + "/static/style.css", "title" to title, "icon" to Config.SERVER_URL + "/static/favicon.png"))
+    respondLocalizedTemplate("markdown.ftl", mapOf("content" to content, "styleSheet" to Config.SERVER_URL + "/static/style.css", "title" to title, "icon" to Config.SERVER_URL + "/static/favicon.png"))
 }
