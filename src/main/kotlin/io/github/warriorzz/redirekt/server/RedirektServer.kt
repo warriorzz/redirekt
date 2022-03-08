@@ -42,19 +42,28 @@ object RedirektServer {
             get("/${if (Config.DASHBOARD_MODE) "" else "r/"}{name}") {
                 val name = call.parameters["name"]
                 logger.info { translate("log.request.redirekt", listOf(name ?: "")) }
-                Repositories.entries.findOne(RedirektEntry::name eq name)
-                    ?.let {
-                        if (it.value is RedirectEntry) {
-                            call.respondRedirect(it.value.url)
-                        } else if (it.value is MarkdownEntry) {
-                            call.respondMarkdown(it.value.markdown)
-                        } else if (it.value is FileEntry) {
-                            call.respondFile(File(it.value.path)) {}
-                        } else {
-                            logger.error { translate("log.redirekt.invalidformat") }
-                            call.respondMarkdown(MarkdownUtil.computeMarkdown("# Unsupported operation"), "Redirekt")
-                        }
-                    } ?: call.respondMarkdown(MarkdownUtil.computeMarkdown("# Error"), "Redirekt - Error")
+                val entry = Repositories.entries.findOne(RedirektEntry::name eq name)
+                if (entry != null) {
+                    if (entry.value is RedirectEntry) {
+                        call.respondRedirect(entry.value.url)
+                    } else if (entry.value is MarkdownEntry) {
+                        call.respondMarkdown(entry.value.markdown)
+                    } else if (entry.value is FileEntry) {
+                        call.respondFile(File(entry.value.path)) {}
+                    } else {
+                        logger.error { translate("log.redirekt.invalidformat", listOf(name ?: "")) }
+                        call.respondMarkdown(
+                            MarkdownUtil.computeMarkdown("# ${translate("respond.unsupported")}"),
+                            "Redirekt"
+                        )
+                    }
+                } else {
+                    logger.info { translate("log.redirekt.error", listOf(name ?: "")) }
+                    call.respondMarkdown(
+                        MarkdownUtil.computeMarkdown("# ${translate("respond.error")}"),
+                        "Redirekt - ${translate("respond.error")}"
+                    )
+                }
             }
 
             static("/static") {

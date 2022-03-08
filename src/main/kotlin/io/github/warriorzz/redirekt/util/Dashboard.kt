@@ -45,7 +45,7 @@ fun Routing.configureDashboard() {
             val principal: OAuthAccessTokenResponse.OAuth2? = call.principal()
 
             if (principal == null) {
-                call.respondMarkdown(MarkdownUtil.computeMarkdown("# Error"), "Redirekt - Error")
+                call.respondMarkdown(MarkdownUtil.computeMarkdown("# ${translate("respond.error")}"), "Redirekt - Error")
                 RedirektServer.logger.info { translate("log.login.fail.principal") }
                 return@get
             }
@@ -56,7 +56,7 @@ fun Routing.configureDashboard() {
             }.login
 
             if (login != Config.AUTHORIZED_GITHUB_USER) {
-                call.respondMarkdown(MarkdownUtil.computeMarkdown("# Access denied"), "Redirekt - Access denied")
+                call.respondMarkdown(MarkdownUtil.computeMarkdown("# Access denied"), "Redirekt - ${translate("respond.accessdenied")}")
                 RedirektServer.logger.info { translate("log.login.fail.user", listOf(login)) }
                 return@get
             }
