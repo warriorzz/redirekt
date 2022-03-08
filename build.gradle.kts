@@ -27,6 +27,7 @@ dependencies {
 
     implementation("org.jetbrains", "markdown", "0.2.4")
     implementation("dev.schlaubi", "envconf", "1.1")
+    implementation("io.github.microutils", "kotlin-logging", "1.12.5")
     implementation("org.slf4j", "slf4j-simple", "1.7.31")
     implementation("org.litote.kmongo", "kmongo-coroutine-serialization", "4.2.7")
 }

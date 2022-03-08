@@ -3,10 +3,7 @@ package io.github.warriorzz.redirekt.server
 import freemarker.cache.ClassTemplateLoader
 import io.github.warriorzz.redirekt.config.Config
 import io.github.warriorzz.redirekt.io.*
-import io.github.warriorzz.redirekt.util.MarkdownUtil
-import io.github.warriorzz.redirekt.util.configureAuthorization
-import io.github.warriorzz.redirekt.util.configureDashboard
-import io.github.warriorzz.redirekt.util.respondMarkdown
+import io.github.warriorzz.redirekt.util.*
 import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.features.json.*
@@ -18,11 +15,13 @@ import io.ktor.routing.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import kotlinx.serialization.Serializable
+import mu.KotlinLogging
 import org.litote.kmongo.eq
 import java.io.File
 
 object RedirektServer {
 
+    val logger = KotlinLogging.logger {}
     val httpClient = HttpClient {
         install(JsonFeature) {
             serializer = KotlinxSerializer(kotlinx.serialization.json.Json { ignoreUnknownKeys = true })
@@ -42,6 +41,7 @@ object RedirektServer {
             }
             get("/${if (Config.DASHBOARD_MODE) "" else "r/"}{name}") {
                 val name = call.parameters["name"]
+                logger.info { translate("log.request.redirekt", listOf(name ?: "")) }
                 Repositories.entries.findOne(RedirektEntry::name eq name)
                     ?.let {
                         if (it.value is RedirectEntry) {
@@ -51,6 +51,7 @@ object RedirektServer {
                         } else if (it.value is FileEntry) {
                             call.respondFile(File(it.value.path)) {}
                         } else {
+                            logger.error { translate("log.redirekt.invalidformat") }
                             call.respondMarkdown(MarkdownUtil.computeMarkdown("# Unsupported operation"), "Redirekt")
                         }
                     } ?: call.respondMarkdown(MarkdownUtil.computeMarkdown("# Error"), "Redirekt - Error")

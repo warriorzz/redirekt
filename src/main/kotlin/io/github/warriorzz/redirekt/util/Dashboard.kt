@@ -23,6 +23,7 @@ import java.util.*
 
 fun Routing.configureDashboard() {
     get("/") {
+        RedirektServer.logger.debug { translate("log.request.main") }
         call.respondLocalizedTemplate(
             "main.ftl", mapOf(
                 "loginUrl" to Config.DASHBOARD_URL + "/login",
@@ -34,8 +35,10 @@ fun Routing.configureDashboard() {
 
     authenticate("auth-dashboard") {
         get("/login") {
+            RedirektServer.logger.debug { translate("log.request.login") }
             if (call.sessions.get<UserSession>() != null) {
                 call.respondRedirect(Config.DASHBOARD_URL + "/dashboard")
+                RedirektServer.logger.info { translate("log.login.success.session") }
                 return@get
             }
 
@@ -43,6 +46,7 @@ fun Routing.configureDashboard() {
 
             if (principal == null) {
                 call.respondMarkdown(MarkdownUtil.computeMarkdown("# Error"), "Redirekt - Error")
+                RedirektServer.logger.info { translate("log.login.fail.principal") }
                 return@get
             }
 
@@ -53,20 +57,24 @@ fun Routing.configureDashboard() {
 
             if (login != Config.AUTHORIZED_GITHUB_USER) {
                 call.respondMarkdown(MarkdownUtil.computeMarkdown("# Access denied"), "Redirekt - Access denied")
+                RedirektServer.logger.info { translate("log.login.fail.user", listOf(login)) }
                 return@get
             }
 
+            RedirektServer.logger.info { translate("log.login.success.user", listOf(login)) }
             call.sessions.set(UserSession(principal.accessToken))
             call.respondRedirect(Config.DASHBOARD_URL + "/dashboard")
         }
 
         route("/dashboard") {
             get {
+                RedirektServer.logger.debug { translate("log.request.dashboard")}
                 if (call.sessions.get<UserSession>() == null) {
                     call.respondRedirect(Config.DASHBOARD_URL + "/login")
+                    RedirektServer.logger.info { translate("log.dashboard.fail.session") }
                     return@get
                 }
-
+                RedirektServer.logger.info { translate("log.dashboard.success") }
                 call.respondLocalizedTemplate(
                     "dashboard.ftl",
                     mapOf(
@@ -87,7 +95,9 @@ fun Routing.configureDashboard() {
             }
 
             post("/markdown") {
+                RedirektServer.logger.info { translate("log.dashboard.submit.markdown.attempt") }
                 if (call.sessions.get<UserSession>() == null) {
+                    RedirektServer.logger.info { translate("log.dashboard.submit.markdown.fail.session") }
                     return@post
                 }
 
@@ -112,8 +122,11 @@ fun Routing.configureDashboard() {
 
                 if (Repositories.entries.findOne(RedirektEntry::name eq name) != null) {
                     call.respondRedirect("/dashboard?error=true")
+                    RedirektServer.logger.info { translate("log.dashboard.submit.markdown.fail.doubled", listOf(name)) }
                     return@post
                 }
+
+                RedirektServer.logger.info { translate("log.dashboard.submit.markdown.new", listOf(name)) }
 
                 Repositories.entries.insertOne(
                     RedirektEntry(
@@ -126,7 +139,9 @@ fun Routing.configureDashboard() {
             }
 
             post("/file") {
+                RedirektServer.logger.info { translate("log.dashboard.submit.file.attempt") }
                 if (call.sessions.get<UserSession>() == null) {
+                    RedirektServer.logger.info { translate("log.dashboard.submit.file.fail.session") }
                     return@post
                 }
 
@@ -154,9 +169,12 @@ fun Routing.configureDashboard() {
                 }
 
                 if (Repositories.entries.findOne(RedirektEntry::name eq name) != null) {
+                    RedirektServer.logger.info { translate("log.dashboard.submit.file.fail.doubled", listOf(name)) }
                     call.respondRedirect("/dashboard?error=true")
                     return@post
                 }
+
+                RedirektServer.logger.info { translate("log.dashboard.submit.file.new", listOf(name)) }
 
                 Repositories.entries.insertOne(
                     RedirektEntry(
@@ -169,19 +187,29 @@ fun Routing.configureDashboard() {
             }
 
             post("/redirect") {
+                RedirektServer.logger.info { translate("log.dashboard.submit.redirekt.attempt") }
+                if (call.sessions.get<UserSession>() == null) {
+                    RedirektServer.logger.info { translate("log.dashboard.submit.redirekt.fail.session") }
+                    return@post
+                }
+
                 val parameters = call.receiveParameters()
                 val name = parameters["name"]
                 val redirekt = parameters["value"]
 
                 if (name == null || redirekt == null) {
+                    RedirektServer.logger.info { translate("log.dashboard.submit.redirekt.fail.invalid") }
                     call.respondText("error")
                     return@post
                 }
 
                 if (Repositories.entries.findOne(RedirektEntry::name eq name) != null) {
+                    RedirektServer.logger.info { translate("log.dashboard.submit.redirekt.fail.doubled", listOf(name)) }
                     call.respondRedirect("/dashboard?error=true")
                     return@post
                 }
+
+                RedirektServer.logger.info { translate("log.dashboard.submit.redirekt.new", listOf(name)) }
 
                 Repositories.entries.insertOne(RedirektEntry(name, RedirectEntry(redirekt)))
                 call.respondRedirect("${Config.SERVER_URL}/dashboard?success=true")

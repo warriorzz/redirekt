@@ -55,5 +55,11 @@ object RedirektNonceManager : NonceManager {
         return nonce
     }
 
-    override suspend fun verifyNonce(nonce: String): Boolean = list.remove(nonce)
+    override suspend fun verifyNonce(nonce: String): Boolean {
+        val valid = list.remove(nonce)
+        if (!valid) {
+            RedirektServer.logger.warn { translate("log.nonce.invalid") }
+        }
+        return valid
+    }
 }
