@@ -68,7 +68,7 @@ fun Routing.configureDashboard() {
 
         route("/dashboard") {
             get {
-                RedirektServer.logger.debug { translate("log.request.dashboard")}
+                RedirektServer.logger.debug { translate("log.request.dashboard") }
                 if (call.sessions.get<UserSession>() == null) {
                     call.respondRedirect(Config.DASHBOARD_URL + "/login")
                     RedirektServer.logger.info { translate("log.dashboard.fail.session") }
