@@ -8,7 +8,7 @@ RUN wget https://upload.wikimedia.org/wikipedia/commons/7/74/Kotlin_Icon.png -O 
 
 RUN ./gradlew --no-daemon installDist
 
-FROM eclipse-temurin:17
+FROM eclipse-temurin:17-alpine
 
 WORKDIR /usr/app
 
