@@ -28,13 +28,19 @@ jobs:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
-      - name: Build image
-        run: docker build . -t ghcr.io/warriorzz/redirekt/redirekt:latest -t ghcr.io/warriorzz/redirekt/redirekt:"$GITHUB_SHA"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: Login ghcr
         env:
           GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }}
         run: docker login ghcr.io --username warriorzz --password "$GITHUB_TOKEN"
-      - name: Push image to ghcr
-        run: docker push ghcr.io/warriorzz/redirekt/redirekt:latest
-      - name: Push specific tag
-        run: docker push ghcr.io/warriorzz/redirekt/redirekt:"$GITHUB_SHA"
+      - name: Build and Push Image
+        run: |
+          docker buildx build \
+                  --tag ghcr.io/warriorzz/redirekt/redirekt:latest \
+                  --tag ghcr.io/warriorzz/redirekt/redirekt:"$GITHUB_SHA" \
+                  --platform linux/amd64,linux/arm64/v8 \
+                  --file ./Dockerfile \
+                  --output type=image,push=true .
