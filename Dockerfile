@@ -14,7 +14,7 @@ RUN case "$(arch)" in \
                  BINARY_URL='https://api.adoptium.net/v3/binary/latest/17/ga/alpine-linux/aarch64/jdk/hotspot/normal/eclipse'; \
                  ;; \
             esac; \
-        wget -O /tmp/openjdk.tar.gz ${BINARY_URL};
+        wget -q -O /tmp/openjdk.tar.gz ${BINARY_URL};
 
 RUN ./gradlew --no-daemon installDist
 
