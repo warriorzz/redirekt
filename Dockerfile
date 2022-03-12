@@ -8,17 +8,17 @@ RUN wget https://upload.wikimedia.org/wikipedia/commons/7/74/Kotlin_Icon.png -O 
 
 RUN case "$(arch)" in \
                amd64|x86_64) \
-                 BINARY_URL='https://api.adoptium.net/v3/binary/latest/17/ga/alpine-linux/x64/jdk/hotspot/normal/eclipse'; \
+                 BINARY_URL='https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jdk/hotspot/normal/eclipse'; \
                  ;; \
                aarch64) \
-                 BINARY_URL='https://api.adoptium.net/v3/binary/latest/17/ga/alpine-linux/aarch64/jdk/hotspot/normal/eclipse'; \
+                 BINARY_URL='https://api.adoptium.net/v3/binary/latest/17/ga/linux/aarch64/jdk/hotspot/normal/eclipse'; \
                  ;; \
             esac; \
         wget -O /tmp/openjdk.tar.gz -q ${BINARY_URL};
 
 RUN ./gradlew --no-daemon installDist
 
-FROM alpine as custom-java
+FROM ubuntu:latest as custom-java
 
 COPY --from=builder /tmp/openjdk.tar.gz /tmp/openjdk.tar.gz
 
@@ -33,7 +33,6 @@ RUN mkdir -p /opt/java/openjdk; \
 
 ENV JAVA_HOME=/opt/java/openjdk \
     PATH="/opt/java/openjdk/bin:$PATH"
-
 
 WORKDIR /usr/app
 
