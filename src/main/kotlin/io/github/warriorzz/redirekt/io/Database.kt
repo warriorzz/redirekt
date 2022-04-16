@@ -12,6 +12,7 @@ object Repositories {
     private val client = KMongo.createClient(Config.DATABASE_URL).coroutine
     private val database = client.getDatabase(Config.DATABASE_NAME)
     val entries = database.getCollection<RedirektEntry>()
+    val uploadedFiles = database.getCollection<UploadedFile>()
 }
 
 @Serializable
@@ -37,6 +38,12 @@ data class RedirectEntry(
 data class FileEntry(
     val path: String,
 ) : RedirektEntryValue()
+
+@Serializable
+data class UploadedFile(
+    val uuid: String,
+    val path: String,
+)
 
 val redirektModule = SerializersModule {
     polymorphic(RedirektEntryValue::class) {
